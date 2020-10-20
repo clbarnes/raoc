@@ -117,5 +117,4 @@ class Emailer:
 
 
 if __name__ == "__main__":
-    main(["data/people.tsv", "-s", "data/smtp.yaml"])
-    # main()
+    main()
