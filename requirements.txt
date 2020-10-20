@@ -1,0 +1,8 @@
+strictyaml
+yagmail[all]
+
+# dev
+
+black
+flake8
+mypy
