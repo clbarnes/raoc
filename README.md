@@ -1,6 +1,6 @@
 # random acts of coffee
 
-Script to automate random acts of coffee: random scheduled meetups within a group.
+Script to automate random acts of coffee: scheduled pair meetups within a group.
 
 - List of people should have email address, then some non-newline whitespace, then name, on each line
 - SMTP configuration is a YAML file with keys
