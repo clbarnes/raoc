@@ -11,6 +11,7 @@ import strictyaml as syml
 logger = logging.getLogger(__name__)
 
 DEFAULT_LOG_LEVEL = logging.DEBUG
+DATESTAMP = dt.date.today().isoformat()
 
 
 def parse_args(args=None):
@@ -41,11 +42,15 @@ class Person(NamedTuple):
     def __str__(self):
         return f"{self.name} <{self.email}>"
 
+    def long_str(self):
+        return f"{self.name} at {self.email}"
+
 
 def read_people(fpath) -> Iterator[Tuple[str, str]]:
     with open(fpath) as f:
         for line in f:
-            yield Person(*line.strip().split(maxsplit=1))
+            if not line.startswith("#"):
+                yield Person(*line.strip().split(maxsplit=1))
 
 
 def chunk(it: Iterable, size: int = 2, sort=False):
@@ -102,7 +107,7 @@ Hi {recipient_name},
 
 This is an automated email to suggest that you meet a labmate for a chat this week.
 
-Get in contact with {partner_name} at {partner_email}.
+Get in contact with {partner}.
 
 Have fun!
 The Coffee Elves
@@ -130,20 +135,17 @@ class Emailer:
         self.password = password
 
     def create_message(self, recipient: Person, partner: Person) -> Tuple[str, str]:
-        today = dt.date.today().isoformat()
         content = MSG_TEMPLATE.format(
             recipient_name=recipient.name,
-            partner_name=partner.name,
-            partner_email=partner.email,
+            partner=partner.long_str(),
             admin=self.admin,
         )
-        subject = f"Random Acts of Coffee {today}: {partner.name}"
+        subject = f"Random Acts of Coffee {DATESTAMP}: {partner.name}"
         return subject, content
 
     def create_odd_message(self, recipient: Person) -> Tuple[str, str]:
-        today = dt.date.today().isoformat()
         content = ODD_TEMPLATE.format(recipient_name=recipient.name, admin=self.admin)
-        subject = f"Random Acts of Coffee {today}: Week off"
+        subject = f"Random Acts of Coffee {DATESTAMP}: Week off"
         return subject, content
 
     def server(self):
@@ -169,7 +171,7 @@ class Emailer:
             {
                 "password": syml.Str(),
                 "sender": syml.Str(),
-                "admin": syml.Str(),
+                "admin_email": syml.Str(),
             }
         )
         with open(fpath) as f:
@@ -182,7 +184,7 @@ def main(args=None):
 
     args = parse_args(args)
     people = read_people(args.people)
-    matcher = PeopleMatcher(people)
+    matcher = PeopleMatcher(people, seed=DATESTAMP)
     matches, odd = matcher.shuffle(args.handle_odd)
 
     if args.smtp:
