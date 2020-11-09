@@ -129,22 +129,24 @@ Contact {admin} if there are any problems.
 
 
 class Emailer:
-    def __init__(self, sender, password, admin):
+    def __init__(self, sender, password, admin_email):
         self.sender = sender
-        self.admin = admin
+        self.admin_email = admin_email
         self.password = password
 
     def create_message(self, recipient: Person, partner: Person) -> Tuple[str, str]:
         content = MSG_TEMPLATE.format(
             recipient_name=recipient.name,
             partner=partner.long_str(),
-            admin=self.admin,
+            admin=self.admin_email,
         )
         subject = f"Random Acts of Coffee {DATESTAMP}: {partner.name}"
         return subject, content
 
     def create_odd_message(self, recipient: Person) -> Tuple[str, str]:
-        content = ODD_TEMPLATE.format(recipient_name=recipient.name, admin=self.admin)
+        content = ODD_TEMPLATE.format(
+            recipient_name=recipient.name, admin=self.admin_email
+        )
         subject = f"Random Acts of Coffee {DATESTAMP}: Week off"
         return subject, content
 
