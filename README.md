@@ -2,7 +2,8 @@
 
 Script to automate random acts of coffee: scheduled pair meetups within a group.
 
-- List of people should have email address, then some non-newline whitespace, then name, on each line
+- List of people should have email address, some non-newline whitespace, interval, whitespace, name
+  - "I want a new partner every {interval} week(s)" - options should be multiples of each other (e.g. 1, 2, 4)
 - SMTP configuration is a YAML file with keys
   - `sender` (the pre-`@` bit of a gmail address)
   - `password` (the gmail password for that account)

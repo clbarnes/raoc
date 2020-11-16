@@ -3,6 +3,7 @@ from argparse import ArgumentParser
 from typing import Iterator, NamedTuple, Iterable, Tuple, List, Optional
 import random
 import datetime as dt
+import time
 import logging
 
 import yagmail
@@ -46,11 +47,21 @@ class Person(NamedTuple):
         return f"{self.name} at {self.email}"
 
 
-def read_people(fpath) -> Iterator[Tuple[str, str]]:
+def weeks_since_epoch():
+    s = time.time()
+    return int(s / 60 / 60 / 24 / 7)
+
+
+def read_people(fpath) -> Iterator[Person]:
     with open(fpath) as f:
         for line in f:
-            if not line.startswith("#"):
-                yield Person(*line.strip().split(maxsplit=1))
+            line = line.strip()
+            if line.startswith("#") or not line:
+                continue
+            email, interval_str, name = line.split(maxsplit=2)
+            interval = int(interval_str)
+            if not weeks_since_epoch() % int(interval):
+                yield Person(email, name)
 
 
 def chunk(it: Iterable, size: int = 2, sort=False):
