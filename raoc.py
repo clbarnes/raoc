@@ -62,6 +62,9 @@ def read_people(fpath) -> Iterator[Person]:
             try:
                 interval, name = interval_name.split(maxsplit=1)
                 if weeks_since_epoch() % int(interval):
+                    logger.info(
+                        "Skipped %s due to off week", Person(email, name)
+                    )
                     continue
             except ValueError:
                 # no number was given
