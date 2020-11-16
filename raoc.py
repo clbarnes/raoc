@@ -58,10 +58,15 @@ def read_people(fpath) -> Iterator[Person]:
             line = line.strip()
             if line.startswith("#") or not line:
                 continue
-            email, interval_str, name = line.split(maxsplit=2)
-            interval = int(interval_str)
-            if not weeks_since_epoch() % int(interval):
-                yield Person(email, name)
+            email, interval_name = line.split(maxsplit=1)
+            try:
+                interval, name = interval_name.split(maxsplit=1)
+                if weeks_since_epoch() % int(interval):
+                    continue
+            except ValueError:
+                # no number was given
+                name = interval_name
+            yield Person(email, name)
 
 
 def chunk(it: Iterable, size: int = 2, sort=False):
