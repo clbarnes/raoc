@@ -13,4 +13,5 @@ setup(
     ),
     py_modules=["raoc"],
     install_requires=["yagmail", "strictyaml"],
+    entry_points={"console_scripts": ["raoc=raoc:main"]}
 )
