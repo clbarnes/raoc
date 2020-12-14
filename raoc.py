@@ -19,14 +19,14 @@ def parse_args(args=None):
     parser = ArgumentParser()
 
     parser.add_argument(
-        "people", help="Path to file whose rows are email address and then name"
+        "people", help="Path to file whose rows are email address, interval, then name (whitespace-separated)"
     )
     # parser.add_argument("--history", "-h", help="Path to TSV file with rows containing date and two email addresses matched")
     parser.add_argument(
         "--handle-odd",
         "-o",
         action="store_true",
-        help="If there is an odd number of people, double up one person to include everyone",
+        help="If there are an odd number of people, double up one person to include everyone",
     )
     parser.add_argument(
         "--smtp",

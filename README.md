@@ -17,18 +17,18 @@ Note that the gmail account must [allow less secure apps](https://support.google
 usage: raoc [-h] [--handle-odd] [--smtp SMTP] people
 
 positional arguments:
-  people                Path to file whose rows are email address and then
-                        name
+  people                Path to file whose rows are email address, interval,
+                        then name (whitespace-separated)
 
 optional arguments:
   -h, --help            show this help message and exit
-  --handle-odd, -o      If there is an odd number of people, double up one
+  --handle-odd, -o      If there are an odd number of people, double up one
                         person to include everyone
   --smtp SMTP, -s SMTP  Path to YAML file containing SMTP configuration to
                         send emails to everyone involved
 ```
 
-A shell script and crontab line to match people and email out the pairings at 08:30 every week:
+An example shell script to match people up and email out, recording the output and log messages:
 
 ```sh
 #!/bin/sh
@@ -43,6 +43,8 @@ env/bin/python raoc.py \
   2> data/log/$(date --iso-8601).log \
   1> data/history/$(date --iso-8601).tsv
 ```
+
+An example [crontab line](https://en.wikipedia.org/wiki/Cron) to run that script at 08:30 every Monday:
 
 ```crontab
 # crontab -e
