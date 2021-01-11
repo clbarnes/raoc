@@ -5,6 +5,7 @@ import random
 import datetime as dt
 import time
 import logging
+import os
 
 import yagmail
 import strictyaml as syml
@@ -12,14 +13,15 @@ import strictyaml as syml
 logger = logging.getLogger(__name__)
 
 DEFAULT_LOG_LEVEL = logging.DEBUG
-DATESTAMP = dt.date.today().isoformat()
+TODAY = dt.date.today()
 
 
 def parse_args(args=None):
     parser = ArgumentParser()
 
     parser.add_argument(
-        "people", help="Path to file whose rows are email address, interval, then name (whitespace-separated)"
+        "people",
+        help="Path to file whose rows are email address, interval, then name (whitespace-separated)",
     )
     # parser.add_argument("--history", "-h", help="Path to TSV file with rows containing date and two email addresses matched")
     parser.add_argument(
@@ -32,6 +34,13 @@ def parse_args(args=None):
         "--smtp",
         "-s",
         help="Path to YAML file containing SMTP configuration to send emails to everyone involved",
+    )
+    parser.add_argument(
+        "--date",
+        "-d",
+        type=dt.date.fromisoformat,
+        default=TODAY,
+        help="Date to run, as ISO-8601, for testing purposes (default: today)",
     )
     return parser.parse_args(args)
 
@@ -47,12 +56,12 @@ class Person(NamedTuple):
         return f"{self.name} at {self.email}"
 
 
-def weeks_since_epoch():
-    s = time.time()
-    return int(s / 60 / 60 / 24 / 7)
+def week_num(date: dt.date):
+    day_since_1 = date.toordinal()
+    return day_since_1 // 7
 
 
-def read_people(fpath) -> Iterator[Person]:
+def read_people(fpath, date: dt.date = TODAY) -> Iterator[Person]:
     with open(fpath) as f:
         for line in f:
             line = line.strip()
@@ -61,10 +70,8 @@ def read_people(fpath) -> Iterator[Person]:
             email, interval_name = line.split(maxsplit=1)
             try:
                 interval, name = interval_name.split(maxsplit=1)
-                if weeks_since_epoch() % int(interval):
-                    logger.info(
-                        "Skipped %s due to off week", Person(email, name)
-                    )
+                if week_num(date) % int(interval):
+                    logger.info("Skipped %s due to off week", Person(email, name))
                     continue
             except ValueError:
                 # no number was given
@@ -148,10 +155,11 @@ Contact {admin} if there are any problems.
 
 
 class Emailer:
-    def __init__(self, sender, password, admin_email):
+    def __init__(self, sender, password, admin_email, date: dt.date = TODAY):
         self.sender = sender
         self.admin_email = admin_email
         self.password = password
+        self.datestamp = date.isoformat()
 
     def create_message(self, recipient: Person, partner: Person) -> Tuple[str, str]:
         content = MSG_TEMPLATE.format(
@@ -159,14 +167,14 @@ class Emailer:
             partner=partner.long_str(),
             admin=self.admin_email,
         )
-        subject = f"Random Acts of Coffee {DATESTAMP}: {partner.name}"
+        subject = f"Random Acts of Coffee {self.datestamp}: {partner.name}"
         return subject, content
 
     def create_odd_message(self, recipient: Person) -> Tuple[str, str]:
         content = ODD_TEMPLATE.format(
             recipient_name=recipient.name, admin=self.admin_email
         )
-        subject = f"Random Acts of Coffee {DATESTAMP}: Week off"
+        subject = f"Random Acts of Coffee {self.datestamp}: Week off"
         return subject, content
 
     def server(self):
@@ -187,7 +195,7 @@ class Emailer:
         server.send(recipient.email, subject, msg)
 
     @classmethod
-    def from_yaml(cls, fpath):
+    def from_yaml(cls, fpath, date: dt.date = d):
         schema = syml.Map(
             {
                 "password": syml.Str(),
@@ -204,12 +212,12 @@ def main(args=None):
     logging.basicConfig(level=DEFAULT_LOG_LEVEL)
 
     args = parse_args(args)
-    people = read_people(args.people)
-    matcher = PeopleMatcher(people, seed=DATESTAMP)
+    people = read_people(args.people, args.date)
+    matcher = PeopleMatcher(people, seed=args.date)
     matches, odd = matcher.shuffle(args.handle_odd)
 
     if args.smtp:
-        emailer = Emailer.from_yaml(args.smtp)
+        emailer = Emailer.from_yaml(args.smtp, args.date)
         emailer.send_pairs(matches)
         if odd:
             emailer.send_odd(odd)
