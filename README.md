@@ -14,7 +14,7 @@ Note that the gmail account must [allow less secure apps](https://support.google
 ## Usage
 
 ```help
-usage: raoc [-h] [--handle-odd] [--smtp SMTP] people
+usage: raoc.py [-h] [--handle-odd] [--smtp SMTP] [--date DATE] people
 
 positional arguments:
   people                Path to file whose rows are email address, interval,
@@ -26,6 +26,8 @@ optional arguments:
                         person to include everyone
   --smtp SMTP, -s SMTP  Path to YAML file containing SMTP configuration to
                         send emails to everyone involved
+  --date DATE, -d DATE  Date to run, as ISO-8601, for testing purposes
+                        (default: today)
 ```
 
 An example shell script to match people up and email out, recording the output and log messages:
