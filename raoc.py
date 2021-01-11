@@ -3,9 +3,7 @@ from argparse import ArgumentParser
 from typing import Iterator, NamedTuple, Iterable, Tuple, List, Optional
 import random
 import datetime as dt
-import time
 import logging
-import os
 
 import yagmail
 import strictyaml as syml
