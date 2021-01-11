@@ -97,16 +97,17 @@ def chunk(it: Iterable, size: int = 2, sort=False):
 
 
 class PeopleMatcher:
-    def __init__(self, people: Iterable[Person], seed=None):
+    def __init__(self, people: Iterable[Person], seed=TODAY):
         self.people = list(people)
-        self.seed = seed
+        self.rand = random.Random(seed.toordinal())
+        first_random = self.rand.random()
+        logger.debug("First random number is %s", first_random)
 
     def shuffle(
         self, handle_odd=False, sort=True
     ) -> Tuple[List[Tuple[Person, Person]], Optional[Person]]:
         ppl = list(self.people)
-        rand = random.Random(self.seed)
-        rand.shuffle(ppl)
+        self.rand.shuffle(ppl)
         leftover = None
         if len(ppl) % 2:
             if handle_odd:
@@ -195,7 +196,7 @@ class Emailer:
         server.send(recipient.email, subject, msg)
 
     @classmethod
-    def from_yaml(cls, fpath, date: dt.date = d):
+    def from_yaml(cls, fpath, date: dt.date = TODAY):
         schema = syml.Map(
             {
                 "password": syml.Str(),
@@ -212,6 +213,8 @@ def main(args=None):
     logging.basicConfig(level=DEFAULT_LOG_LEVEL)
 
     args = parse_args(args)
+    logger.debug("Args: %s", args)
+    logger.debug("Effective date is %s", args.date)
     people = read_people(args.people, args.date)
     matcher = PeopleMatcher(people, seed=args.date)
     matches, odd = matcher.shuffle(args.handle_odd)
