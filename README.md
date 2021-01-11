@@ -11,6 +11,8 @@ Script to automate random acts of coffee: scheduled pair meetups within a group.
 
 Note that the gmail account must [allow less secure apps](https://support.google.com/accounts/answer/6010255).
 
+The script is deterministic based on the date, to day resolution (defaults to the date of the system time).
+
 ## Usage
 
 ```help
