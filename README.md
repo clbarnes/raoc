@@ -2,16 +2,29 @@
 
 Script to automate random acts of coffee: scheduled pair meetups within a group.
 
-- List of people should have email address, some non-newline whitespace, interval, whitespace, name
+A non-functional example configuration exists in [`/example`](./example), and includes:
+
+- List of participants, including an email address, some non-newline whitespace, interval, whitespace, name
   - "I want a new partner every {interval} week(s)" - options should be multiples of each other (e.g. 1, 2, 4)
-- SMTP configuration is a YAML file with keys
+- SMTP configuration for sending gmail address, a YAML file with keys
   - `sender` (the pre-`@` bit of a gmail address)
   - `password` (the gmail password for that account)
   - `admin` (name of administrator, possibly contact details if the sender is no-reply)
 
-Note that the gmail account must [allow less secure apps](https://support.google.com/accounts/answer/6010255).
+Note that the sending gmail account must [allow less secure apps](https://support.google.com/accounts/answer/6010255).
 
 The script is deterministic based on the date, to day resolution (defaults to the date of the system time).
+
+## Installation
+
+Written for python 3.9; may work with some lower versions.
+
+```sh
+cd path/to/this/dir
+pip install .
+```
+
+This will install a script
 
 ## Usage
 
@@ -40,7 +53,9 @@ An example shell script to match people up and email out, recording the output a
 
 cd ~/raoc
 mkdir -p data/log data/history
-env/bin/python raoc.py \
+source env/bin/activate
+
+raoc \
   data/people.tsv \
   --smtp data/smtp.yaml \
   --handle-odd \
@@ -53,5 +68,5 @@ An example [crontab line](https://en.wikipedia.org/wiki/Cron) to run that script
 ```crontab
 # crontab -e
 # min  hr  mnthday  mnth  wkday  command
-30     8   *        *     MON    ~/raoc_script.sh
+30     8   *        *     MON    bash ~/raoc_script.sh
 ```
