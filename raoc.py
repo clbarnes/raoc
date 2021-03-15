@@ -96,7 +96,7 @@ def chunk(it: Iterable, size: int = 2, sort=False):
 
 class PeopleMatcher:
     def __init__(self, people: Iterable[Person], seed=TODAY):
-        self.people = list(people)
+        self.people: List[Person] = list(people)
         self.rand = random.Random(seed.toordinal())
         first_random = self.rand.random()
         logger.debug("First random number is %s", first_random)
@@ -112,7 +112,7 @@ class PeopleMatcher:
                 ppl.append(ppl[0])
             else:
                 leftover = ppl.pop()
-        out = list(chunk(ppl, 2, sort))
+        out: List[Person] = list(chunk(ppl, 2, sort))
         if sort:
             out = sorted(out)
         return out, leftover
